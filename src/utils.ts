@@ -18,7 +18,7 @@ const calculateParentAccumulatives = (txs: MempoolTransactions, parents: txid[])
     return { accumulativeWeight, accumulativeFee, parentHierarchy }
 }
 
-export const sortTransactionsByWeightedFee = (txs: MempoolTransactions): WeightedMempoolTransaction[] => {
+export const sortTransactionsByWeightedFee = (txs: MempoolTransactions): { weightedTxs: WeightedMempoolTransactions, sortedWeightedTxsList: WeightedMempoolTransaction[]} => {
     const weightedTxs: WeightedMempoolTransactions = {}
     Object.values(txs).forEach(tx => {
       const parentAccumulatives = calculateParentAccumulatives(txs, tx.parents)
@@ -26,21 +26,21 @@ export const sortTransactionsByWeightedFee = (txs: MempoolTransactions): Weighte
       const accumulativeWeight = parentAccumulatives.accumulativeWeight + tx.weight
       const accumulativeFee = parentAccumulatives.accumulativeFee + tx.fee
       const accumulativeWeightedFee = accumulativeFee / accumulativeWeight
-      const parentHierarchy = [...parentAccumulatives.parentHierarchy, tx.tx_id]
+      const txHierarchy = [...parentAccumulatives.parentHierarchy, tx.tx_id]
 
       const weightedTx: WeightedMempoolTransaction = {
             ...tx,
             accumulativeWeight,
             accumulativeFee,
             accumulativeWeightedFee,
-            parentHierarchy,
+            txHierarchy,
       }
       weightedTxs[tx.tx_id] = weightedTx
     });
 
-    const weightedTxsArray = Object.values(weightedTxs);
-    array_sort(weightedTxsArray, "accumulativeWeightedFee");
-    return weightedTxsArray.reverse();
+    const weightedTxsList = Object.values(weightedTxs);
+    array_sort(weightedTxsList, "accumulativeWeightedFee");
+    return {weightedTxs, sortedWeightedTxsList: weightedTxsList.reverse() };
   };
 
  export const saveBlock = (block: txid[]) => {

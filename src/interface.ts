@@ -16,9 +16,9 @@ export interface WeightedMempoolTransaction extends MempoolTransaction {
     accumulativeWeight: number;       // (weight + parent's weight)
     accumulativeFee: number;          // (fee + parent's fee)
     accumulativeWeightedFee: number,  // (fee + parent's fee)/(weight + parent's weight)
-    parentHierarchy: txid[]
+    txHierarchy: txid[]               // hierarchy of parents and child transactions(top-down)
 }
 
 export interface WeightedMempoolTransactions {
     [tx_id: string]: WeightedMempoolTransaction
-}
+}  
