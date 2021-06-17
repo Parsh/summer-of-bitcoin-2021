@@ -1,6 +1,6 @@
 import csv from "csv-parser"
 import fs from "fs"
-import { MempoolTransaction } from "./interface";
+import { MempoolTransaction, MempoolTransactions } from "./interface";
 
 const processRawMempoolTransaction = (rawTx: any): MempoolTransaction => {
     // transforms rawTx from mempool.csv to operational tx
@@ -10,8 +10,8 @@ const processRawMempoolTransaction = (rawTx: any): MempoolTransaction => {
     rawTx.parents = splits[0] ? splits : [];
 
     // type casting(string >> int)
-    rawTx.fee = parseInt(rawTx.fee)
-    rawTx.weight = parseInt(rawTx.weight)
+    rawTx.fee = parseInt(rawTx.fee, 10)
+    rawTx.weight = parseInt(rawTx.weight, 10)
 
     return rawTx
 }
@@ -19,13 +19,12 @@ const processRawMempoolTransaction = (rawTx: any): MempoolTransaction => {
 export const fetchMempool = async (callback: Function) => {
   // reads and parses mempool.csv    
 
-  let mempool: MempoolTransaction[] = [];
+  const mempool: MempoolTransactions = {};
   await fs
         .createReadStream(__dirname + "/files/mempool.csv")
         .pipe(csv())
-        .on("data", data => mempool.push(processRawMempoolTransaction(data)))
+        .on("data", data => mempool[data.tx_id] = processRawMempoolTransaction(data))
         .on("end", () => {
-              console.log(`Mempool stats: ${mempool.length} transactions in the pool`)
               callback(mempool)
         });
 };
