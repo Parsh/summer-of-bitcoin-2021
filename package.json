@@ -1,0 +1,26 @@
+{
+  "name": "summer-of-bitcoin-2021",
+  "version": "1.0.0",
+  "description": "solution for summer of bitcoin 2021 coding challenge",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Parsh/summer-of-bitcoin-2021.git"
+  },
+  "author": "Parsh",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Parsh/summer-of-bitcoin-2021/issues"
+  },
+  "homepage": "https://github.com/Parsh/summer-of-bitcoin-2021#readme",
+  "dependencies": {
+    "ts-node": "^10.0.0",
+    "tsc": "^2.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^15.12.2"
+  }
+}
