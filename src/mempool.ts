@@ -1,6 +1,6 @@
 import csv from "csv-parser"
 import fs from "fs"
-import { MempoolTransaction, MempoolTransactions } from "./interface";
+import { BLOCK_WEIGHT_MAX, MempoolTransaction, MempoolTransactions, txid, WeightedMempoolTransaction } from "./interface";
 
 const processRawMempoolTransaction = (rawTx: any): MempoolTransaction => {
     // transforms rawTx from mempool.csv to operational tx
@@ -28,3 +28,16 @@ export const fetchMempool = async (callback: Function) => {
               callback(mempool)
         });
 };
+
+export const generateBlock = (weightedTxsList: WeightedMempoolTransaction[]) => {
+      let block: txid[] = [];
+      let accumulativeWeight = 0;
+      for(const tx of weightedTxsList){
+            if(accumulativeWeight + tx.accumulativeWeight > BLOCK_WEIGHT_MAX) break
+            if(block.includes(tx.tx_id)) continue
+
+            accumulativeWeight += tx.accumulativeWeight;
+            block.push(...tx.parentHierarchy); 
+      }
+      return block;
+}

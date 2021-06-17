@@ -1,5 +1,6 @@
 
 import array_sort from 'array-sort'
+import fs from "fs"
 import { MempoolTransactions, txid, WeightedMempoolTransaction, WeightedMempoolTransactions } from "./interface";
 
 const calculateParentAccumulatives = (txs: MempoolTransactions, parents: txid[],): {accumulativeWeight: number, accumulativeWeightedFee: number, parentHierarchy: txid[]} => {
@@ -39,3 +40,15 @@ export const sortTransactionsByWeightedFee = (txs: MempoolTransactions): Weighte
     return weightedTxsArray.reverse();
   };
 
+ export const saveBlock = (block: txid[]) => {
+      console.log({block})
+      const file = fs.createWriteStream(__dirname + "/files/block.txt");
+      file.on("error", function(err) {
+            console.log({err})
+      });
+      block.forEach(txid => {
+        file.write(txid + "\n");
+      });
+      file.end();
+};
+    
