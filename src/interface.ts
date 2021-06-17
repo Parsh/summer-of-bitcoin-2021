@@ -1,3 +1,4 @@
+export const BLOCK_WEIGHT_MAX = 4000000
 export type txid = string
 
 export interface MempoolTransaction {
@@ -12,7 +13,9 @@ export interface MempoolTransactions {
 }
 
 export interface WeightedMempoolTransaction extends MempoolTransaction {
+    accumulativeWeight: number;       // (weight + parent's weight)
     accumulativeWeightedFee: number,  // (fee + parent's fee)/(weight + parent's weight)
+    parentHierarchy: txid[]
 }
 
 export interface WeightedMempoolTransactions {
