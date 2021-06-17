@@ -32,12 +32,16 @@ export const fetchMempool = async (callback: Function) => {
 export const generateBlock = (weightedTxsList: WeightedMempoolTransaction[]) => {
       let block: txid[] = [];
       let accumulativeWeight = 0;
+      let accumulativeFee = 0;
       for(const tx of weightedTxsList){
             if(accumulativeWeight + tx.accumulativeWeight > BLOCK_WEIGHT_MAX) break
             if(block.includes(tx.tx_id)) continue
 
             accumulativeWeight += tx.accumulativeWeight;
-            block.push(...tx.parentHierarchy); 
+            accumulativeFee += tx.accumulativeFee
+            tx.parentHierarchy.forEach(txid => {
+                  if(!block.includes(txid)) block.push(txid)
+            })
       }
       return block;
 }

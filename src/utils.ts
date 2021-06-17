@@ -3,34 +3,37 @@ import array_sort from 'array-sort'
 import fs from "fs"
 import { MempoolTransactions, txid, WeightedMempoolTransaction, WeightedMempoolTransactions } from "./interface";
 
-const calculateParentAccumulatives = (txs: MempoolTransactions, parents: txid[],): {accumulativeWeight: number, accumulativeWeightedFee: number, parentHierarchy: txid[]} => {
+const calculateParentAccumulatives = (txs: MempoolTransactions, parents: txid[]): {accumulativeWeight: number, accumulativeFee: number, parentHierarchy: txid[]} => {
     let accumulativeWeight = 0
-    let accumulativeWeightedFee = 0
+    let accumulativeFee = 0
     const parentHierarchy: txid[] = []
     parents.forEach((parent_txid) => {
           const parentTx = txs[parent_txid]
           let parentAccumulatives = calculateParentAccumulatives(txs, parentTx.parents)
 
-          const weightedFee = parentTx.fee/parentTx.weight
           accumulativeWeight += parentAccumulatives.accumulativeWeight + parentTx.weight
-          accumulativeWeightedFee += (parentAccumulatives.accumulativeWeightedFee + weightedFee)
+          accumulativeFee += (parentAccumulatives.accumulativeFee + parentTx.fee)
           parentHierarchy.push(...parentAccumulatives.parentHierarchy, parentTx.tx_id)
     })
-    return {accumulativeWeight, accumulativeWeightedFee, parentHierarchy}
+    return { accumulativeWeight, accumulativeFee, parentHierarchy }
 }
 
 export const sortTransactionsByWeightedFee = (txs: MempoolTransactions): WeightedMempoolTransaction[] => {
     const weightedTxs: WeightedMempoolTransactions = {}
     Object.values(txs).forEach(tx => {
       const parentAccumulatives = calculateParentAccumulatives(txs, tx.parents)
-      const weightedFee = tx.fee / tx.weight;
+     
       const accumulativeWeight = parentAccumulatives.accumulativeWeight + tx.weight
-      const accumulativeWeightedFee = parentAccumulatives.accumulativeWeightedFee + weightedFee
+      const accumulativeFee = parentAccumulatives.accumulativeFee + tx.fee
+      const accumulativeWeightedFee = accumulativeFee / accumulativeWeight
+      const parentHierarchy = [...parentAccumulatives.parentHierarchy, tx.tx_id]
+
       const weightedTx: WeightedMempoolTransaction = {
             ...tx,
             accumulativeWeight,
+            accumulativeFee,
             accumulativeWeightedFee,
-            parentHierarchy: parentAccumulatives.parentHierarchy
+            parentHierarchy,
       }
       weightedTxs[tx.tx_id] = weightedTx
     });
@@ -41,7 +44,6 @@ export const sortTransactionsByWeightedFee = (txs: MempoolTransactions): Weighte
   };
 
  export const saveBlock = (block: txid[]) => {
-      console.log({block})
       const file = fs.createWriteStream(__dirname + "/files/block.txt");
       file.on("error", function(err) {
             console.log({err})
